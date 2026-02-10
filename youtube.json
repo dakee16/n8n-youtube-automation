@@ -1,0 +1,428 @@
+{
+  "name": "youtube",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -624,
+        -224
+      ],
+      "id": "2be21724-ce4c-45cc-8c87-ea4313383b64",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1vMKSft1q32-5MoUnoMc_6QpEEedxyvXxhCBLmjwAGvs",
+          "mode": "list",
+          "cachedResultName": "youtube",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vMKSft1q32-5MoUnoMc_6QpEEedxyvXxhCBLmjwAGvs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vMKSft1q32-5MoUnoMc_6QpEEedxyvXxhCBLmjwAGvs/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -400,
+        -240
+      ],
+      "id": "dccc46e7-4a8b-44f3-a0af-2e94a1b28799",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZXlJTQVmB0DzphKm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0809661b-a4e4-41b9-8438-15f140957fc3",
+              "leftValue": "={{$json[\"Status\"]}}",
+              "rightValue": "not done",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        -224
+      ],
+      "id": "8ff61913-0b1c-40cb-b726-a5b858128fa5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        80,
+        -240
+      ],
+      "id": "a87da96d-fc38-4c33-9d1f-6926875cafc8",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aeab17c2-440b-4bc5-bb16-8f0b613eb101",
+              "name": "Caption",
+              "value": "={{ $json.Caption }}",
+              "type": "string"
+            },
+            {
+              "id": "51ebc23f-29f2-4721-ae25-17dc522a1852",
+              "name": "row_number",
+              "value": "={{ $json.row_number }}",
+              "type": "number"
+            },
+            {
+              "id": "b2eaa286-8256-4203-a887-5f41f5a0c669",
+              "name": "fileId",
+              "value": "={{$json[\"Drive links\"].match(/\\/d\\/([^\\/]+)/)[1]}}",
+              "type": "string"
+            },
+            {
+              "id": "36ed24f7-7690-4321-b52a-491b3c9c5e5d",
+              "name": "Status",
+              "value": "done",
+              "type": "string"
+            },
+            {
+              "id": "dc2c0ded-024d-40a4-986b-735c3f735cd6",
+              "name": "Upload time",
+              "value": "={{$now}}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -224
+      ],
+      "id": "3ca8e61b-5832-4b5e-b3a6-d221eb7855b8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{$json.fileId}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        528,
+        -224
+      ],
+      "id": "e9e4d6e4-f5e6-467d-a4fc-75a0dae8d6fe",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "7YJOyjEgj6eX7FVu",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ \n  ((($json.Caption || '').trim()) || 'Short')\n    .slice(0, 90) \n  + ' #shorts' \n}}\n",
+        "regionCode": "US",
+        "categoryId": "24",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        736,
+        -368
+      ],
+      "id": "8e343a52-c10b-44a8-b95a-9eb6c3621847",
+      "name": "Upload a video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "4lqZhQNwKE2Auxl3",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1vMKSft1q32-5MoUnoMc_6QpEEedxyvXxhCBLmjwAGvs",
+          "mode": "list",
+          "cachedResultName": "youtube",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vMKSft1q32-5MoUnoMc_6QpEEedxyvXxhCBLmjwAGvs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vMKSft1q32-5MoUnoMc_6QpEEedxyvXxhCBLmjwAGvs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Drive links",
+              "displayName": "Drive links",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Caption",
+              "displayName": "Caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Upload time",
+              "displayName": "Upload time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "uploadId",
+              "displayName": "uploadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1088,
+        -176
+      ],
+      "id": "7ba481ef-44c0-4f52-aa80-94b1c4d82834",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZXlJTQVmB0DzphKm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        880,
+        -176
+      ],
+      "id": "c0c8d666-cb2d-44a5-a4d9-fc7e08d1b28f",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a video": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "174aff06-1134-422f-92a6-8010af0e45ff",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6d573d44c6f2f7d60cfc39f898785c985bcc4b4aae34515047bcd3299894300b"
+  },
+  "id": "JlvXli5Z3wx_7UCs9613h",
+  "tags": []
+}
