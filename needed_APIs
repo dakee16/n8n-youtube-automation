@@ -1,0 +1,4 @@
+OPENAI_API_KEY -------> Create Credentials add connect to n8n using the API key.
+GOOGLE_SHEETS_ID -----------
+                            |----------> Get from Google Console API and Credentials
+YOUTUBE_API_KEY   ----------
