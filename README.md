@@ -28,7 +28,7 @@ The main workflow is located at: youtube.json
 
 ## 🔐 Credentials
 All credentials are handled via n8n's credential manager.
-See `.env.example` for required variables.
+See `needed_APIs` for required variables.
 
 ## 📌 Notes
 This workflow is shared for demonstration purposes.
